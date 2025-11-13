@@ -11,6 +11,12 @@
 
 #include "usart.h"
 #include "gpio.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
+
+
+extern uint8_t rxbuffer;
+extern SemaphoreHandle_t uartRxSemaphore;
 
 typedef struct{
 	char c;
@@ -24,11 +30,12 @@ static shell_func_t shell_func_list[SHELL_FUNC_LIST_MAX_SIZE];
 static char print_buffer[BUFFER_SIZE];
 
 static char uart_read() {
-	char c;
+	//char c;
 
-	HAL_UART_Receive(&UART_DEVICE, (uint8_t*)(&c), 1, HAL_MAX_DELAY);
+	HAL_UART_Receive_IT(&huart2, &rxbuffer, 1);
+    xSemaphoreTake(uartRxSemaphore, HAL_MAX_DELAY);
 
-	return c;
+	return (char)rxbuffer;
 }
 
 static int uart_write(char * s, uint16_t size) {
