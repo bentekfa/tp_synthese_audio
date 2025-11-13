@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -25,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
+#include "shell.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,10 +52,21 @@ int __io_putchar(int chr)
 	HAL_UART_Transmit(&huart2, (uint8_t*) &chr, 1, HAL_MAX_DELAY);
 	return chr;
 }
+
+TaskHandle_t h_shell_task;
+
+void ShellTask(void  * argument)
+{
+
+	shell_init();
+	shell_run();
+
+}
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -95,10 +108,23 @@ int main(void)
 	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
 
-	//*******QUESTION 1 ********
-	 printf("Test printf sur USART2 !\r\n");
+	//*******QUESTION 4 ********
+	printf("Test printf sur USART2 !\r\n");
 
+	if (xTaskCreate(ShellTask,"shell", 256, NULL,1, &h_shell_task)!=pdPASS)
+	{
+		printf("error creation task shell\r\n");
+		Error_Handler();	}
+	vTaskStartScheduler();
 	/* USER CODE END 2 */
+
+	/* Call init function for freertos objects (in cmsis_os2.c) */
+	MX_FREERTOS_Init();
+
+	/* Start scheduler */
+	osKernelStart();
+
+	/* We should never get here as control is now taken by the scheduler */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
@@ -106,10 +132,9 @@ int main(void)
 	{
 		/* USER CODE END WHILE */
 
-
 		/* USER CODE BEGIN 3 */
 
-		//*******QUESTION 1 ********
+		//*******QUESTION 2 ********
 		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, GPIO_PIN_SET);
 		HAL_Delay(1000);
 		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, GPIO_PIN_RESET);
@@ -117,8 +142,8 @@ int main(void)
 
 		//*******QUESTION 3 ********
 
-		//HAL_Delay(1000);
-		//HAL_UART_Transmit(&huart2, (uint8_t*)"Hello\r\n", 7, HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart2, (uint8_t*)"Hello\r\n", 7, HAL_MAX_DELAY);
+
 	}
 	/* USER CODE END 3 */
 }
