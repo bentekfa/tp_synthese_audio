@@ -77,6 +77,47 @@ Ce résultat confirme que :
 - Le système est prêt pour l’ajout de nouvelles commandes  
 
 ---
+## 2 – Le GPIO Expander et le VU-Mètre
+
+### 2.1 Configuration du GPIO Expander
+
+Le VU-mètre du TP est piloté à l’aide d’un **GPIO Expander** dont la référence est :
+
+- **MCP23S17** (expander GPIO 16 bits commandé en SPI)
+
+La communication entre le STM32 et le MCP23S17 se fait via le bus **SPI3** du microcontrôleur.
+
+### 2.2 Configuration du SPI3 dans STM32CubeIDE
+
+#### 2.2.1 Paramètres généraux du SPI
+
+D’après la documentation du **MCP23S17**, la fréquence maximale du bus SPI est de **10 MHz**.  
+Nous avons donc configuré le périphérique **SPI3** à 10 MHz dans STM32CubeIDE, comme illustré ci-dessous :
+
+![Configuration du SPI3 dans STM32CubeIDE](image8.jpg)
+
+Les paramètres principaux sont les suivants :
+
+- **Fréquence SPI** : 10 MHz  
+- **Data size** : 8 bits (conformément au protocole SPI et au MCP23S17)  
+- **NSS Signal Type** : gestion en **software** (NSS Software)
+
+#### 2.2.2 Mapping des broches SPI3
+
+Ensuite, il est nécessaire de mapper correctement les signaux SPI3 du STM32 vers le MCP23S17.  
+La configuration retenue est la suivante :
+
+- **SPI3_MOSI** (Master Out Slave In)  → **PB5**  
+- **SPI3_MISO** (Master In Slave Out) → **PC11**  
+- **SPI3_SCK** (Serial Clock)         → **PC10**  
+- **SPI3_/CS** (Chip Select)          → **PB7**  
+- **/RESET** du MCP23S17              → **PA0**
+
+Cette configuration est visible sur le schéma des broches généré par STM32CubeIDE :
+
+![Mapping des signaux SPI3 sur la NUCLEO-L476RG](image7.jpg)
+
+Ces broches ont ensuite été configurées dans l’onglet **GPIO Settings** de STM32CubeIDE afin de garantir une communication correcte entre le STM32L476 et le MCP23S17 pour le pilotage du VU-mètre.
 
 
 
