@@ -143,6 +143,7 @@ while(1){
     MCP23S17_Write(0x13, 0x55);
 }
 ```
+![Test d’une LED sur deux](video1_gif.gif)
 
 
 
