@@ -194,9 +194,16 @@ int main(void)
 		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, GPIO_PIN_RESET);
 		HAL_Delay(1000);*/
 
+		/*=============================================TEST LEDS SANS STRUCTURE==============================================================
+		Blink_All_LEDs();
+		LED_Chenillard();*/
 
-		//Blink_All_LEDs();
-		LED_Chenillard();
+
+		/*=============================================TEST LEDS AVEC STRUCTURE=============================================================*/
+		LED_Driver_t led_driver;
+		LED_Driver_Init(&led_driver);
+		led_driver.blink_all();
+
 
 	}
 	/* USER CODE END 3 */

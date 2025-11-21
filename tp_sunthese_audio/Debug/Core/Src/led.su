@@ -4,3 +4,4 @@
 ../Core/Src/led.c:53:6:Test_First_LED	8	static
 ../Core/Src/led.c:57:6:Blink_All_LEDs	8	static
 ../Core/Src/led.c:67:6:LED_Chenillard	16	static
+../Core/Src/led.c:75:6:LED_Driver_Init	16	static

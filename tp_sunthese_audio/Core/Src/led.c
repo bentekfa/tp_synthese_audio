@@ -72,3 +72,15 @@ void LED_Chenillard(void) {
 	}
 
 }
+void LED_Driver_Init(LED_Driver_t *driver) {
+
+	driver->init = init_MCP23017;
+	driver->write = write_MCP23017;
+	driver->read = read_MCP23S17;
+	driver->test_first_led = Test_First_LED;
+	driver->chenillard = LED_Chenillard;
+	driver->blink_all = Blink_All_LEDs;
+
+
+	driver->init();
+}
