@@ -52,6 +52,7 @@
 uint8_t rxbuffer;
 SemaphoreHandle_t uartRxSemaphore;
 h_shell_t h_shell;
+extern SPI_HandleTypeDef hspi3;
 
 /* USER CODE END PV */
 
@@ -161,19 +162,20 @@ int main(void)
 
 	vTaskStartScheduler();*/
 
-	h_shell.drv.receive = drv_uart2_receive;
+	/*h_shell.drv.receive = drv_uart2_receive;
 	h_shell.drv.transmit = drv_uart2_transmit;
 
 	shell_init(&h_shell);
 	shell_add(&h_shell, 'f', fonction, "Une fonction inutile");
-	shell_run(&h_shell);
+	shell_run(&h_shell);*/
+  init_MCP23017();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
-  MX_FREERTOS_Init();
+ // MX_FREERTOS_Init();
 
   /* Start scheduler */
-  osKernelStart();
+ // osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
 
@@ -185,15 +187,15 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-		//*******QUESTION 2 ********
+		/*QUESTION 2 ********
 		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, GPIO_PIN_SET);
 		HAL_Delay(1000);
 		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, GPIO_PIN_RESET);
-		HAL_Delay(1000);
+		HAL_Delay(1000);*/
 
 		//*******QUESTION 3 ********
 
-		HAL_UART_Transmit(&huart2, (uint8_t*)"Hello\r\n", 7, HAL_MAX_DELAY);
+		Blink_All_LEDs();
 
 	}
   /* USER CODE END 3 */
