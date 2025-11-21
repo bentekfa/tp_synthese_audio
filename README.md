@@ -94,7 +94,7 @@ La communication entre le STM32 et le MCP23S17 se fait via le bus **SPI3** du mi
 D’après la documentation du **MCP23S17**, la fréquence maximale du bus SPI est de **10 MHz**.  
 Nous avons donc configuré le périphérique **SPI3** à 10 MHz dans STM32CubeIDE, comme illustré ci-dessous :
 
-![Configuration du SPI3 dans STM32CubeIDE](image8.jpg)
+![Configuration du SPI3 dans STM32CubeIDE](image9.jpg)
 
 Les paramètres principaux sont les suivants :
 
@@ -115,9 +115,35 @@ La configuration retenue est la suivante :
 
 Cette configuration est visible sur le schéma des broches généré par STM32CubeIDE :
 
-![Mapping des signaux SPI3 sur la NUCLEO-L476RG](image7.jpg)
+![Mapping des signaux SPI3 sur la NUCLEO-L476RG](image8.jpg)
 
 Ces broches ont ensuite été configurées dans l’onglet **GPIO Settings** de STM32CubeIDE afin de garantir une communication correcte entre le STM32L476 et le MCP23S17 pour le pilotage du VU-mètre.
+### 2.2 Tests
 
+Le MCP23S17 pilote deux réseaux de LEDs connectés respectivement sur ses ports **GPIOA** et **GPIOB**.  
+Ces LEDs s’activent à l’état bas (logique inversée). Les tests incluent :
+
+- Activation alternée d'une LED sur deux  
+- Validation du bon fonctionnement via un chenillard  
+
+Les registres utilisés pour configurer et contrôler les LEDs sont présentés en détail ci-dessous.
+
+---
+
+#### 2.2.1 Test d'une LED sur 2
+
+```c
+MCP23S17_Init();
+while(1){
+
+    // Premiers tests des LEDs sans structure
+    //Test_First_LED();
+    //Blink_All_LEDs();
+    //LED_Chenillard();
+    MCP23S17_Write(0x13, 0x55);
+}
+```
+md
+<video src="video1.mp4" controls width="640"></video>
 
 
