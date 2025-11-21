@@ -21,6 +21,9 @@ Un message de test a été envoyé depuis la carte :
 ```c
 printf("Test printf sur USART2 !\r\n");
 ```
+![image1](image1)
+
+
 ### 1.3 Redirection de la fonction printf
 
 Afin de faciliter l’affichage sur le terminal série, la fonction `printf` a été redirigée vers l’USART2 grâce à la fonction suivante :
