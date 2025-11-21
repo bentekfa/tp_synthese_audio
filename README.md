@@ -48,7 +48,21 @@ L’affichage répété de ce message dans le terminal série confirme que :
 - Les tâches FreeRTOS sont exécutées correctement  
 - L’ordonnanceur fonctionne comme prévu
   
-### 1.5 Mise en place du Shell
+  ### 1.5 Configuration de FreeRTOS
+
+Le système **FreeRTOS** a été activé en mode **CMSIS_V1** dans STM32CubeIDE.  
+Cette configuration permet de gérer les tâches du projet via un ordonnanceur temps réel.
+
+Les captures ci-dessous montrent :
+
+- l’activation de FreeRTOS avec l’option **USE_NEWLIB_REENTRANT** (Newlib réentrante) ;
+- l’utilisation de **TIM7** comme source de timebase pour le tick système.
+
+![Configuration FreeRTOS CMSIS_V1](image11.jpg)
+
+![Sélection de TIM7 comme timebase](image10.jpg)
+
+### 1.6 Mise en place du Shell
 
 Un **shell série** a été mis en place afin de permettre une interaction directe avec la carte via le terminal série.
 
@@ -61,7 +75,7 @@ Au démarrage, le message suivant est affiché :
 
 Ce message indique que le shell a été correctement initialisé et qu’il est prêt à recevoir des commandes.
 
-### 1.6 Test des commandes du Shell
+
 
 Une première commande de test a été envoyée dans le terminal :
 
