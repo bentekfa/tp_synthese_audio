@@ -41,6 +41,9 @@ Le système d’exploitation temps réel **FreeRTOS** a été activé en mode **
 Une tâche a ensuite été créée afin d’envoyer périodiquement le message **"Hello"** sur l’USART2.
 
 L’affichage répété de ce message dans le terminal série confirme que :
+![Tâche FreeRTOS Hello](image5.jpg)
+
+![FreeRTOS + printf](image3.jpg)
 
 - Les tâches FreeRTOS sont exécutées correctement  
 - L’ordonnanceur fonctionne comme prévu
@@ -53,6 +56,9 @@ Au démarrage, le message suivant est affiché :
 
 ===== Monsieur Shell v0.2 =====
 
+
+![image4](image4.jpg)
+
 Ce message indique que le shell a été correctement initialisé et qu’il est prêt à recevoir des commandes.
 
 ### 1.6 Test des commandes du Shell
@@ -62,6 +68,7 @@ Une première commande de test a été envoyée dans le terminal :
 
 Le shell a alors répondu :
 
+![image2](image2.jpg)
 
 Ce résultat confirme que :
 
@@ -71,14 +78,5 @@ Ce résultat confirme que :
 
 ---
 
-## Conclusion – Partie Démarrage
-
-Cette première partie du TP a permis de :
-
-- Créer et configurer un projet sur la carte **NUCLEO_L476RG**  
-- Vérifier la communication série avec l’USART2  
-- Configurer et utiliser correctement la fonction `printf`  
-- Activer et utiliser **FreeRTOS** en mode CMSIS V1  
-- Mettre en place un shell série interactif et fonctionnel  
 
 
