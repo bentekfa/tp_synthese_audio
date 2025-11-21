@@ -143,7 +143,7 @@ while(1){
     MCP23S17_Write(0x13, 0x55);
 }
 ```
-md
-<video src="video1.mp4" controls width="640"></video>
+[▶️ Vidéo du test d’une LED sur deux](video1.mp4)
+
 
 
