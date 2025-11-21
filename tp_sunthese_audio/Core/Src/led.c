@@ -62,3 +62,13 @@ void Blink_All_LEDs(void) {
 		HAL_Delay(500);
 	}
 }
+
+
+void LED_Chenillard(void) {
+	for (uint8_t i = 0; i < 8; i++) {
+		write_MCP23017(0x13, ~(1 << i));
+		write_MCP23017(0x12, ~(1 << i));
+		HAL_Delay(200);
+	}
+
+}
