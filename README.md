@@ -155,6 +155,7 @@ void LED_Chenillard(void) {
         HAL_Delay(200);
     }
 }
+```
 ![Test d’une LED](video2_gif.gif)
 
 
