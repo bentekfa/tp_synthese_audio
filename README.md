@@ -132,30 +132,12 @@ Les registres utilisés pour configurer et contrôler les LEDs sont présentés 
 
 #### 2.2.1 Test d'une LED sur 2
 
-```c
-MCP23S17_Init();
-while(1){
 
-    // Premiers tests des LEDs sans structure
-    //Test_First_LED();
-    //Blink_All_LEDs();
-    //LED_Chenillard();
-    MCP23S17_Write(0x13, 0x55);
-}
-```
 ![Test d’une LED sur deux](video1_gif.gif)
 
 #### 2.2.2 Chenillard
 
-```c
-void LED_Chenillard(void) {
-    for (uint8_t i = 0; i < 8; i++) {
-        MCP23S17_Write(0x13, ~(1 << i));
-        MCP23S17_Write(0x12, ~(1 << i));
-        HAL_Delay(200);
-    }
-}
-```
+
 ![Test d’une LED](video2_gif.gif)
 
 
