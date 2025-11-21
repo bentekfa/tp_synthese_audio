@@ -143,7 +143,10 @@ while(1){
     MCP23S17_Write(0x13, 0x55);
 }
 ```
-[▶️ Vidéo du test d’une LED sur deux](video1.mp4)
+<video src="video1.mp4" controls width="480">
+  Your browser does not support the video tag.
+</video>
+
 
 
 
