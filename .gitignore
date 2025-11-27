@@ -1,0 +1,46 @@
+# Build directories
+Debug/
+Release/
+build/
+
+# IDE metadata
+.settings/
+.vscode/
+*.launch
+*.mxproject
+*.cubeide
+*.cproject
+*.project
+*.workspace
+
+# CubeMX backups
+*.ioc.save
+*.ioc.backup
+
+# Build artifacts
+*.o
+*.d
+*.su
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+
+# Editor backups, logs, temp
+*~
+*.bak
+*.swp
+*.log
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Python cache
+__pycache__/
+*.pyc
