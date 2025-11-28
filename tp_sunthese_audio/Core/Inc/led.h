@@ -9,6 +9,8 @@
 #define INC_LED_H_
 
 #include <stdint.h>
+#include "shell.h"
+
 
 typedef struct {
     void (*init)(void);
@@ -26,6 +28,6 @@ void Test_First_LED(void);
 void Blink_All_LEDs(void);
 void LED_Chenillard(void);
 void LED_Driver_Init(LED_Driver_t *driver);
-
+int shell_control_led(h_shell_t *h_shell, int argc, char **argv);
 
 #endif /* INC_LED_H_ */

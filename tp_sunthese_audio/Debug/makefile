@@ -64,8 +64,8 @@ all: main-build
 main-build: tp_sunthese_audio.elf secondary-outputs
 
 # Tool invocations
-tp_sunthese_audio.elf tp_sunthese_audio.map: $(OBJS) $(USER_OBJS) C:\Users\maram\OneDrive\Bureau\tp_sunthese\tp_sunthese_audio\STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "tp_sunthese_audio.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\maram\OneDrive\Bureau\tp_sunthese\tp_sunthese_audio\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tp_sunthese_audio.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+tp_sunthese_audio.elf tp_sunthese_audio.map: $(OBJS) $(USER_OBJS) C:\Users\maram\OneDrive\Bureau\ESE\TP_SYNTHESE\tp_sunthese_audio\STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "tp_sunthese_audio.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\maram\OneDrive\Bureau\ESE\TP_SYNTHESE\tp_sunthese_audio\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tp_sunthese_audio.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
