@@ -260,6 +260,7 @@ Pour cela, la ligne suivante a été ajoutée dans la fonction `main()`, juste a
 ```c
 __HAL_SAI_ENABLE(&hsai_BlockA2);
 ```
+
 ### 3.2.1 Vérification du signal MCLK à l’oscilloscope
 
 À l’aide d’un oscilloscope, la présence du signal **MCLK** généré par le bloc **SAI2** a été vérifiée sur la broche **PB14 (SAI2_MCLK_A)**.
@@ -267,7 +268,8 @@ __HAL_SAI_ENABLE(&hsai_BlockA2);
 La mesure indique une fréquence d’environ **12.3 MHz**, ce qui correspond à la valeur attendue (**12.235294 MHz**).  
 Cela confirme que la configuration du **PLLSAI1** et du **SAI2** est correcte.
 
-![Mesure du signal MCLK à l’oscilloscope (≈12.3 MHz)](assets/your_image_name.jpg)
+![Mesure du signal MCLK à l’oscilloscope (≈12.3 MHz)](assets/image25.jpg)
+
 
 
 
