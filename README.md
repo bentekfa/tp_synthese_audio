@@ -268,7 +268,17 @@ __HAL_SAI_ENABLE(&hsai_BlockA2);
 La mesure indique une fréquence d’environ **12.3 MHz**, ce qui correspond à la valeur attendue (**12.235294 MHz**).  
 Cela confirme que la configuration du **PLLSAI1** et du **SAI2** est correcte.
 
-![Mesure du signal MCLK à l’oscilloscope (≈12.3 MHz)](assets/image25.jpg)
+![Mesure du signal MCLK à l’oscilloscope (≈12.3 MHz)](assets/image25.png)
+
+### 3.2.2 Lecture du registre CHIP_ID par I2C
+
+La fonction `HAL_I2C_Mem_Read()` a été utilisée pour lire le contenu du registre **CHIP_ID** situé à l’adresse **0x0000** du CODEC **SGTL5000**.  
+L’adresse I2C utilisée pour le périphérique est **0x14**.
+
+La valeur lue correspond à **0x0001**, ce qui confirme que la communication **I2C fonctionne correctement** entre le STM32 et le CODEC.
+
+![Lecture du registre CHIP_ID sur Tera Term](assets/image27.jpg)
+
 
 
 
