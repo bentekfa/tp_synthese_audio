@@ -183,6 +183,7 @@ Les lignes utilisées pour l’I²C sur la carte NUCLEO-L476RG sont les suivante
 - **I2C_SDA : PB11**
 
 Ces deux broches correspondent à l’interface **I2C2** du STM32L476RG.
+ ![image14](assets/image14.jpg)
 
 
 
