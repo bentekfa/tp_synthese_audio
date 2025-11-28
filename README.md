@@ -172,6 +172,19 @@ Ces commandes permettent de valider rapidement le fonctionnement du driver ainsi
 
 <img src="assets/image12.jpg" width="350">
 
+### 3. Le CODEC Audio SGTL5000
+
+### 3.1 Configurations préalables
+
+Le CODEC **SGTL5000** nécessite une interface I²C pour sa configuration.  
+Les lignes utilisées pour l’I²C sur la carte NUCLEO-L476RG sont les suivantes :
+
+- **I2C_SCL : PB10**  
+- **I2C_SDA : PB11**
+
+Ces deux broches correspondent à l’interface **I2C2** du STM32L476RG.
+
+
 
 
 
