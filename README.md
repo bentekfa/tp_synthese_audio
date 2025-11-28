@@ -286,6 +286,25 @@ Les trames **I2C** ont été observées directement à l’oscilloscope sur les 
 Le signal mesuré présente des créneaux réguliers correspondant aux impulsions d’horloge et aux données échangées sur le bus I2C, ce qui confirme le bon fonctionnement de la communication entre les deux dispositifs.
 
 ![Observation des trames I2C à l’oscilloscope](assets/image27.png)
+### 3.2.5 Valeurs des registres du CODEC SGTL5000
+
+À partir de la documentation officielle du **SGTL5000**, les valeurs suivantes ont été identifiées afin de configurer correctement le CODEC audio :
+
+- **CHIP_ANA_POWER** : `0x6AFF`  
+- **CHIP_LINREG_CTRL** : `0x006C`  
+- **CHIP_REF_CTRL** : `0x004E`  
+- **CHIP_LINE_OUT_CTRL** : `0x0322`  
+- **CHIP_SHORT_CTRL** : `0x1106`  
+- **CHIP_ANA_CTRL** : `0x0133`  
+- **CHIP_DIG_POWER** : `0x0073`  
+- **CHIP_LINE_OUT_VOL** : `0x0505`  
+- **CHIP_CLK_CTRL** : `0x0002`  
+- **CHIP_I2S_CTRL** : `0x0001`  
+- **CHIP_ADCDAC_CTRL** : `0x000C`  
+- **CHIP_DAC_VOL** : `0x3C3C`
+
+Ces valeurs seront utilisées dans la fonction d’initialisation du CODEC afin d’activer l’ensemble des blocs analogiques et numériques nécessaires à la conversion audio.
+
 
 
 
