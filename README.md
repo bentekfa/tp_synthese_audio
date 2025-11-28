@@ -277,7 +277,7 @@ L’adresse I2C utilisée pour le périphérique est **0x14**.
 
 La valeur lue correspond à **0x0001**, ce qui confirme que la communication **I2C fonctionne correctement** entre le STM32 et le CODEC.
 
-![Lecture du registre CHIP_ID sur Tera Term](assets/image27.jpg)
+![Lecture du registre CHIP_ID sur Tera Term](assets/image28.jpg)
 
 ### 3.2.3 Observation des trames I2C à l’oscilloscope
 
