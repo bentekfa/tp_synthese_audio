@@ -167,6 +167,7 @@ Le shell série a ensuite été enrichi de commandes permettant de tester ce dri
   - l’état souhaité (1 pour l’allumer, 0 pour l’éteindre).
 
 Ces commandes permettent de valider rapidement le fonctionnement du driver ainsi que la communication SPI avec le MCP23S17.
-![image1](assets/image12)
+![image12](assets/image12)
+
 
 
