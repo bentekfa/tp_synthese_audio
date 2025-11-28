@@ -21,12 +21,17 @@ Un message de test a été envoyé depuis la carte :
 ```c
 printf("Test printf sur USART2 !\r\n");
 ```
-![image1](image1)
+![image1](assets/image1)
 
 
-### 1.3 Redirection de la fonction printf
 
-Afin de faciliter l’affichage sur le terminal série, la fonction `printf` a été redirigée vers l’USART2 grâce à la fonction suivante :
+### 1.3–1.4 Redirection de printf et validation de la communication USART2
+
+Pour permettre l’utilisation de `printf` au sein d’un système multitâche et faciliter l’affichage des messages sur le terminal série, la redirection de la fonction `printf` et l’activation de FreeRTOS ont été réalisées conjointement.
+
+#### Redirection de `printf` vers l’USART2
+
+La fonction suivante redirige tous les appels à `printf()` vers l’USART2, utilisé comme port série via la ST-Link :
 
 ```c
 int __io_putchar(int chr)
@@ -34,16 +39,11 @@ int __io_putchar(int chr)
     HAL_UART_Transmit(&huart2, (uint8_t*)&chr, 1, HAL_MAX_DELAY);
     return chr;
 }
+
 ```
-### 1.4 Activation de FreeRTOS et test avec messages périodiques
+![Tâche FreeRTOS Hello](assets/image5.jpg)
 
-Le système d’exploitation temps réel **FreeRTOS** a été activé en mode **CMSIS V1**.  
-Une tâche a ensuite été créée afin d’envoyer périodiquement le message **"Hello"** sur l’USART2.
-
-L’affichage répété de ce message dans le terminal série confirme que :
-![Tâche FreeRTOS Hello](image5.jpg)
-
-![FreeRTOS + printf](image3.jpg)
+![FreeRTOS + printf](assets/image3.jpg)
 
 - Les tâches FreeRTOS sont exécutées correctement  
 - L’ordonnanceur fonctionne comme prévu
@@ -58,9 +58,9 @@ Les captures ci-dessous montrent :
 - l’activation de FreeRTOS avec l’option **USE_NEWLIB_REENTRANT** (Newlib réentrante) ;
 - l’utilisation de **TIM7** comme source de timebase pour le tick système.
 
-![Configuration FreeRTOS CMSIS_V1](image11.jpg)
+![Configuration FreeRTOS CMSIS_V1](assets/image11.jpg)
 
-![Sélection de TIM7 comme timebase](image10.jpg)
+![Sélection de TIM7 comme timebase](assets/image10.jpg)
 
 ### 1.6 Mise en place du Shell
 
@@ -71,7 +71,7 @@ Au démarrage, le message suivant est affiché :
 ===== Monsieur Shell v0.2 =====
 
 
-![image4](image4.jpg)
+![image4](assets/image4.jpg)
 
 Ce message indique que le shell a été correctement initialisé et qu’il est prêt à recevoir des commandes.
 
@@ -82,7 +82,7 @@ Une première commande de test a été envoyée dans le terminal :
 
 Le shell a alors répondu :
 
-![image2](image2.jpg)
+![image2](assets/image2.jpg)
 
 Ce résultat confirme que :
 
@@ -108,7 +108,7 @@ La communication entre le STM32 et le MCP23S17 se fait via le bus **SPI3** du mi
 D’après la documentation du **MCP23S17**, la fréquence maximale du bus SPI est de **10 MHz**.  
 Nous avons donc configuré le périphérique **SPI3** à 10 MHz dans STM32CubeIDE, comme illustré ci-dessous :
 
-![Configuration du SPI3 dans STM32CubeIDE](image9.jpg)
+![Configuration du SPI3 dans STM32CubeIDE](assets/image9.jpg)
 
 Les paramètres principaux sont les suivants :
 
@@ -129,7 +129,7 @@ La configuration retenue est la suivante :
 
 Cette configuration est visible sur le schéma des broches généré par STM32CubeIDE :
 
-![Mapping des signaux SPI3 sur la NUCLEO-L476RG](image8.jpg)
+![Mapping des signaux SPI3 sur la NUCLEO-L476RG](assets/image8.jpg)
 
 Ces broches ont ensuite été configurées dans l’onglet **GPIO Settings** de STM32CubeIDE afin de garantir une communication correcte entre le STM32L476 et le MCP23S17 pour le pilotage du VU-mètre.
 ### 2.2 Tests
@@ -147,12 +147,12 @@ Les registres utilisés pour configurer et contrôler les LEDs sont présentés 
 #### 2.2.1 Test d'une LED sur 2
 
 
-![Test d’une LED sur deux](video1_gif.gif)
+![Test d’une LED sur deux](assets/video1_gif.gif)
 
 #### 2.2.2 Chenillard
 
 
-![Test d’une LED](video2_gif.gif)
+![Test d’une LED](assets/video2_gif.gif)
 
 
 
