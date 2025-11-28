@@ -279,6 +279,15 @@ La valeur lue correspond à **0x0001**, ce qui confirme que la communication **I
 
 ![Lecture du registre CHIP_ID sur Tera Term](assets/image27.jpg)
 
+### 3.2.3 Observation des trames I2C à l’oscilloscope
+
+Les trames **I2C** ont été observées directement à l’oscilloscope sur les lignes **SCL/SDA** lors de la communication entre le STM32 et le CODEC **SGTL5000**.
+
+Le signal mesuré présente des créneaux réguliers correspondant aux impulsions d’horloge et aux données échangées sur le bus I2C, ce qui confirme le bon fonctionnement de la communication entre les deux dispositifs.
+
+![Observation des trames I2C à l’oscilloscope](assets/image27.png)
+
+
 
 
 
