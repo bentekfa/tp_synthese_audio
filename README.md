@@ -184,6 +184,94 @@ Les lignes utilisées pour l’I²C sur la carte NUCLEO-L476RG sont les suivante
 
 Ces deux broches correspondent à l’interface **I2C2** du STM32L476RG.
  ![image14](assets/image14.jpg)
+### 3.1.2 Activation de l’I2C2
+
+Le périphérique **I2C2** a été activé dans STM32CubeIDE en laissant la configuration par défaut.  
+Cette interface est utilisée pour configurer les registres du CODEC audio SGTL5000.
+
+![Activation de l’I2C2 dans CubeMX](assets/image19.jpg)
+
+### 3.1.3 Configuration du SAI2 
+
+Le bloc **SAI A** a été configuré en mode **Master with Master Clock Out** afin de générer le signal d’horloge MCLK nécessaire au CODEC.  
+Le protocole **I2S/PCM** a été activé avec une taille de données de **16 bits** et un fonctionnement en mode **stéréo**.
+![Configuration](assets/image21.jpg)
+
+### 3.1.4 Mapping des broches du SAI2
+
+Les broches du périphérique **SAI2** ont été vérifiées et placées conformément à l’énoncé du TP.  
+Les signaux sont connectés comme suit :
+
+- **PB12 → SAI2_FS_A**
+- **PB13 → SAI2_SCK_A**
+- **PB14 → SAI2_MCLK_A**
+- **PB15 → SAI2_SD_A**
+- **PC12 → SAI2_SD_B**
+
+Cette configuration assure une communication correcte entre le STM32 et le CODEC audio SGTL5000.
+
+![Mapping des broches SAI2](assets/image23.jpg)
+
+ ### 3.1.5 Configuration de l’horloge du SAI2 (PLLSAI1)
+
+Dans l’onglet **Clock Configuration** de STM32CubeIDE, le **PLLSAI1** a été configuré afin d’obtenir une fréquence de **12.235294 MHz** pour le périphérique **SAI2**, conformément à l’énoncé du TP.
+
+Cette fréquence correspond au signal **MCLK (Master Clock)** nécessaire au bon fonctionnement du CODEC audio **SGTL5000**.
+
+![Configuration du PLLSAI1 pour obtenir 12.235294 MHz au SAI2](assets/image15.jpg)
+
+
+### 3.1.6 Configuration détaillée des blocs SAI A et SAI B
+
+Le bloc **SAI A** a été configuré en mode **Master Transmit** avec génération d’horloge (MCLK), en utilisant le protocole **I2S Standard** et une taille de données de **16 bits**.
+
+![Configuration détaillée du bloc SAI A](assets/image16.jpg)
+
+Le bloc **SAI B** a été configuré en mode **Slave Receive**, synchronisé avec le bloc SAI A, tout en conservant le protocole **I2S Standard** et une taille de données de **16 bits**.
+
+![Configuration détaillée du bloc SAI B](assets/image17.jpg)
+
+### 3.1.7 Activation des interruptions du SAI2
+
+Les interruptions du périphérique **SAI2** ont été activées dans l’onglet **NVIC** de STM32CubeIDE.  
+Cela permet au microcontrôleur de gérer les événements liés au transfert des données audio (transmission et réception via DMA).
+
+![Activation des interruptions du SAI2](assets/image20.jpg)
+
+### 3.1.8 Configuration du DMA pour le SAI2
+
+Le **DMA** a été configuré pour les deux blocs du SAI2 afin de permettre le transfert continu des données audio :
+
+- **SAI2_A → DMA1 Channel 6**
+- **SAI2_B → DMA1 Channel 7**
+- Mode de fonctionnement : **Circulaire**
+
+Cette configuration est nécessaire pour assurer un flux de données audio continu entre le STM32 et le CODEC SGTL5000.
+
+![Configuration DMA pour SAI2](assets/image18.jpg)
+
+### 3.1.9 Activation manuelle de l’horloge MCLK
+
+Avant toute tentative de communication avec le CODEC SGTL5000, l’horloge **MCLK** doit être activée.  
+Cette horloge est générée par le bloc **SAI A**.
+
+Pour cela, la ligne suivante a été ajoutée dans la fonction `main()`, juste après l’initialisation des périphériques :
+
+```c
+__HAL_SAI_ENABLE(&hsai_BlockA2);
+```
+### 3.2.1 Vérification du signal MCLK à l’oscilloscope
+
+À l’aide d’un oscilloscope, la présence du signal **MCLK** généré par le bloc **SAI2** a été vérifiée sur la broche **PB14 (SAI2_MCLK_A)**.
+
+La mesure indique une fréquence d’environ **12.3 MHz**, ce qui correspond à la valeur attendue (**12.235294 MHz**).  
+Cela confirme que la configuration du **PLLSAI1** et du **SAI2** est correcte.
+
+![Mesure du signal MCLK à l’oscilloscope (≈12.3 MHz)](assets/your_image_name.jpg)
+
+
+
+
 
 
 
