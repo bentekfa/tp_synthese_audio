@@ -154,6 +154,20 @@ Les registres utilisés pour configurer et contrôler les LEDs sont présentés 
 
 ![Test d’une LED](assets/video2_gif.gif)
 
+### 2.3 Driver et intégration avec le Shell
+
+Un driver dédié a été développé pour gérer l’allumage et l’extinction des LED du MCP23S17.  
+Ce driver repose sur une structure permettant d’organiser proprement les registres, l’état des LEDs et les fonctions associées.
+
+Le shell série a ensuite été enrichi de commandes permettant de tester ce driver :
+
+- **Commande `a`** : active simultanément l’ensemble des LED du VU-mètre.
+- **Commande `l`** : permet de contrôler une LED précise en fournissant deux paramètres :
+  - le numéro de la LED à manipuler,
+  - l’état souhaité (1 pour l’allumer, 0 pour l’éteindre).
+
+Ces commandes permettent de valider rapidement le fonctionnement du driver ainsi que la communication SPI avec le MCP23S17.
+
 
 
 
