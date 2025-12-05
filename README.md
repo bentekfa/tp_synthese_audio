@@ -305,7 +305,22 @@ Le signal mesuré présente des créneaux réguliers correspondant aux impulsion
 
 Ces valeurs seront utilisées dans la fonction d’initialisation du CODEC afin d’activer l’ensemble des blocs analogiques et numériques nécessaires à la conversion audio.
 
+###3.2.6 Création des fichiers sgtl5000.c et sgtl5000.h
 
+Deux fichiers ont été ajoutés afin de structurer le driver du CODEC :
+
+c
+/Core/Src/sgtl5000.c
+/Core/Inc/sgtl5000.h
+
+
+### 3.2.7 Fonction d’initialisation du CODEC
+
+Dans sgtl5000.c, nous avons créé une fonction dédiée
+
+### 3.2.8 configurarion de ces registres
+
+![image](assets/image29.jpg)
 
 
 
