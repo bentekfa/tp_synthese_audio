@@ -322,6 +322,20 @@ Dans sgtl5000.c, nous avons créé une fonction dédiée
 
 ![image](assets/image29.jpg)
 
+### 3.3 — Signaux I²S
+
+Après l'initialisation du CODEC, la transmission et la réception audio ont été démarrées via DMA :
+
+```c
+HAL_SAI_Receive_DMA(&hsai_BlockB2, rx_buf, BUFFER_SIZE);
+HAL_SAI_Transmit_DMA(&hsai_BlockA2, tx_buf, BUFFER_SIZE);
+```
+
+Les signaux I²S (**MCLK, SCK, LRCLK, SD**) ont ensuite été observés à l’oscilloscope.  
+Le signal **MCLK** est mesuré à environ **12.3 MHz**, conforme à la configuration du PLLSAI1.
+
+![Oscilloscope](assets/image30.jpg)
+
 
 
 
