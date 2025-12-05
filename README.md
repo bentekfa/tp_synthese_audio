@@ -318,23 +318,50 @@ c
 
 Dans sgtl5000.c, nous avons créé une fonction dédiée
 
-### 3.2.8 configurarion de ces registres
+
+#### 3.2.8 Configuration des registres du CODEC via I²C
+
+L’écriture des registres du SGTL5000 a été réalisée via I²C.  
+Le message suivant affiché sur le terminal confirme que l’initialisation s’est déroulée correctement :
+
+> **SGTL5000: Initialization complete.**
 
 ![image](assets/image29.jpg)
 
-### 3.3 — Signaux I²S
+Le CODEC est donc configuré et opérationnel.
 
-Après l'initialisation du CODEC, la transmission et la réception audio ont été démarrées via DMA :
+---
 
-```c
-HAL_SAI_Receive_DMA(&hsai_BlockB2, rx_buf, BUFFER_SIZE);
-HAL_SAI_Transmit_DMA(&hsai_BlockA2, tx_buf, BUFFER_SIZE);
-```
+## 3.3 Signaux I²S
 
-Les signaux I²S (**MCLK, SCK, LRCLK, SD**) ont ensuite été observés à l’oscilloscope.  
-Le signal **MCLK** est mesuré à environ **12.3 MHz**, conforme à la configuration du PLLSAI1.
+### 3.3.1 Activation du flux audio avec DMA
 
-![Oscilloscope](assets/image30.jpg)
+Pour permettre l’échange continu des données audio, deux buffers I²S ont été créés :
+
+
+Ils permettent :
+
+- la réception des échantillons audio,
+- la transmission vers le DAC,
+- la base pour le traitement audio en temps réel.
+
+---
+
+### 3.3.2 Observation des signaux I²S à l’oscilloscope
+
+Après l’activation du DMA, les signaux I²S ont été observés à l’oscilloscope afin de valider la communication audio.
+
+Les signaux mesurés :
+
+- **MCLK** — Master Clock
+  ![Oscilloscope](assets/image30.jpg)
+- **SCK** — Serial Clock  
+- **FS (LRCLK)** — Frame Sync  
+- **SD** — Données audio série
+
+Cette mesure confirme le bon fonctionnement de l’interface I²S.
+
+
 
 
 
