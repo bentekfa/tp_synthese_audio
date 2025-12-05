@@ -362,6 +362,19 @@ Les signaux mesurés :
 
 Cette mesure confirme le bon fonctionnement de l’interface I²S.
 
+### 3.4 Génération de signal audio
+
+Dans cette étape, un **signal triangulaire** a été généré et envoyé vers la sortie audio du CODEC SGTL5000 afin de vérifier le bon fonctionnement de la chaîne complète.
+
+#### 3.4.1 Création du signal triangulaire
+
+Un buffer audio a été rempli avec une valeur variant linéairement, permettant de produire une onde triangulaire simple.
+
+#### 3.4.2 Observation à l’oscilloscope
+
+La sortie LINE-OUT du CODEC a été observée à l’oscilloscope, où un signal triangulaire stable a été clairement visualisé.
+
+![Signal triangulaire](assets/image32.jpg)
 
 
 
