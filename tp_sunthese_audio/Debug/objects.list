@@ -1,3 +1,4 @@
+"./Core/Src/ sgtl5000.o"
 "./Core/Src/dma.o"
 "./Core/Src/drv_usart2.o"
 "./Core/Src/freertos.o"
