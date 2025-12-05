@@ -354,10 +354,11 @@ Après l’activation du DMA, les signaux I²S ont été observés à l’oscill
 Les signaux mesurés :
 
 - **MCLK** — Master Clock
-  ![Oscilloscope](assets/image30.jpg)
+  
+<img src="assets/image30.jpg" width="700">
+  
 - **SCK** — Serial Clock  
-- **FS (LRCLK)** — Frame Sync  
-- **SD** — Données audio série
+<img src="assets/image31.jpg" width="700">
 
 Cette mesure confirme le bon fonctionnement de l’interface I²S.
 
