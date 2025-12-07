@@ -885,13 +885,13 @@ void generateTriangleWave(void) {
 
 ```
 Pour vérifier la génération on a visualiser les points sur le terminal : 
-![Signal triangulaire](assets/triang.jpg)
+![Signal triangulaire](assets/triang.png)
 
 #### 3.4.2 Observation à l’oscilloscope
 
 La sortie LINE-OUT du CODEC a été observée à l’oscilloscope, où un signal triangulaire stable a été clairement visualisé.
 
-![Signal triangulaire](assets/sig.jpg)
+![Signal triangulaire](assets/sig.png)
 
 
 
