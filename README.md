@@ -62,7 +62,7 @@ Les captures ci-dessous montrent :
 
 Un **shell série** a été mis en place afin de permettre une interaction directe avec la carte via le terminal série.
 
-**(a) Dans une tâche**
+***(a) Dans une tâche***
 Une tâche FreeRTOS gère le shell, lisant et traitant les commandes via une boucle.
 
 ```c
@@ -84,7 +84,7 @@ void ShellTask(void  * argument)
 
 
 ![image4](assets/image4.jpg)
-**(b) En mode interruption**
+***(b) En mode interruption***
 
 Le shell fonctionne en mode interruption : l’ISR UART signale à la tâche shell via un sémaphore dès qu’un caractère est reçu, permettant un traitement des commandes en temps réel sans bloquer le microcontrôleur.
 ```c
@@ -109,7 +109,7 @@ uartRxSemaphore = xSemaphoreCreateBinary();
 	}
 ```
 ![image4](assets/image4.jpg)
-**(c) Avec un driver sous forme de structure.**
+***(c) Avec un driver sous forme de structure.***
 ```c
 #include "shell.h"
 
