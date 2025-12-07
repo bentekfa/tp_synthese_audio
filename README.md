@@ -108,7 +108,7 @@ uartRxSemaphore = xSemaphoreCreateBinary();
 	    Error_Handler();
 	}
 ```
-
+![image4](assets/image4.jpg)
 **(c) Avec un driver sous forme de structure.**
 ```c
 #include "shell.h"
@@ -232,17 +232,8 @@ int shell_run(h_shell_t * h_shell) {
 	return 0;
 }
 ```
-
+![image4](assets/image4.jpg)
  
-Ce message indique que le shell a été correctement initialisé et qu’il est prêt à recevoir des commandes.
-
-
-Ce résultat confirme que :
-
-- Le shell fonctionne correctement  
-- Les commandes sont reconnues et traitées  
-- Le système est prêt pour l’ajout de nouvelles commandes  
-
 ---
 ## 2 – Le GPIO Expander et le VU-Mètre
 
