@@ -271,48 +271,302 @@ La configuration retenue est la suivante :
 - **SPI3_/CS** (Chip Select)          → **PB7**  
 - **/RESET** du MCP23S17              → **PA0**
 
-Cette configuration est visible sur le schéma des broches généré par STM32CubeIDE :
 
 ![Mapping des signaux SPI3 sur la NUCLEO-L476RG](assets/image8.jpg)
 
-Ces broches ont ensuite été configurées dans l’onglet **GPIO Settings** de STM32CubeIDE afin de garantir une communication correcte entre le STM32L476 et le MCP23S17 pour le pilotage du VU-mètre.
 ### 2.2 Tests
 
 Le MCP23S17 pilote deux réseaux de LEDs connectés respectivement sur ses ports **GPIOA** et **GPIOB**.  
-Ces LEDs s’activent à l’état bas (logique inversée). Les tests incluent :
+Ces LEDs s’activent à l’état bas (logique inversée).
 
-- Activation alternée d'une LED sur deux  
-- Validation du bon fonctionnement via un chenillard  
-
-Les registres utilisés pour configurer et contrôler les LEDs sont présentés en détail ci-dessous.
+![Pins_des_leds](assets/pins.png)
 
 ---
 
-#### 2.2.1 Test d'une LED sur 2
+#### 2.2.1 Clignotement des Leds:
+```c
+void Blink_All_LEDs(void) {
+	while (1) {
+		write_MCP23017(0x13, 0xFF);
+		HAL_Delay(500);
+		write_MCP23017(0x13, 0x00);
+		HAL_Delay(500);
+	}
+}
+```
 
 
 ![Test d’une LED sur deux](assets/video1_gif.gif)
 
 #### 2.2.2 Chenillard
 
+```
+void LED_Chenillard(void) {
+	for (uint8_t i = 0; i < 8; i++) {
+		write_MCP23017(0x13, ~(1 << i));
+		write_MCP23017(0x12, ~(1 << i));
+		HAL_Delay(200);
+	}
 
+}
+```
 ![Test d’une LED](assets/video2_gif.gif)
 
-### 2.3 Driver et intégration avec le Shell
+### 2.3.1 Création d'un Driver pour Piloter les LEDs
 
-Un driver dédié a été développé pour gérer l’allumage et l’extinction des LED du MCP23S17.  
-Ce driver repose sur une structure permettant d’organiser proprement les registres, l’état des LEDs et les fonctions associées.
+Dans cette partie du TP, nous avons créé un driver pour piloter les LEDs connectées au GPIO Expander MCP23S17 en utilisant une structure LED_Driver_t. Cette structure permet d'encapsuler les fonctions nécessaires pour contrôler les LEDs, telles que l'initialisation du MCP23S17, l'écriture dans les registres, ainsi que des fonctions comme le test d'une LED, le chenillard, et le clignotement de toutes les LEDs.
 
-Le shell série a ensuite été enrichi de commandes permettant de tester ce driver :
+```
+/*
+ * led.c
+ *
+ *  Created on: Nov 21, 2025
+ *      Author: maram
+ */
+#include"led.h"
+#include <stdint.h>
+#include "main.h"
+#include "shell.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+extern SPI_HandleTypeDef hspi3;
+extern LED_Driver_t led_driver;
 
-- **Commande `a`** : active simultanément l’ensemble des LED du VU-mètre.
-- **Commande `l`** : permet de contrôler une LED précise en fournissant deux paramètres :
-  - le numéro de la LED à manipuler,
-  - l’état souhaité (1 pour l’allumer, 0 pour l’éteindre).
+void write_MCP23017(uint8_t registre, uint8_t value)
+{
+	uint8_t commande[3];
+	commande[0]=0x40; //
+	commande[1]=registre;
+	commande[2]=value;
 
+	HAL_GPIO_WritePin(GPIOA, VU_nRESET_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB, VU_nCS_Pin, GPIO_PIN_RESET); //SC=0 pour l'envoie
+	HAL_SPI_Transmit(&hspi3, commande, 3, HAL_MAX_DELAY);
+	HAL_Delay(10);
+	HAL_GPIO_WritePin(GPIOB,VU_nCS_Pin, GPIO_PIN_SET);
+
+
+
+}
+
+uint8_t read_MCP23S17(uint8_t reg) {
+	uint8_t data[3];
+	uint8_t rxData[1];
+
+	data[0] = 0x41;
+	data[1] = reg;
+	data[2] = 0x00;
+
+	HAL_GPIO_WritePin(GPIOB, VU_nCS_Pin, GPIO_PIN_RESET);
+	HAL_SPI_TransmitReceive(&hspi3, data, data, 3, HAL_MAX_DELAY);
+	HAL_GPIO_WritePin(GPIOB, VU_nCS_Pin, GPIO_PIN_SET);
+
+	return data[2];
+}
+
+void init_MCP23017(void)
+{
+	write_MCP23017(0x00,0x00); // les oins A en sortie
+	write_MCP23017(0x01,0x00); // les pins B en sortie
+	write_MCP23017(0x12,0xFF);
+	write_MCP23017(0x13,0x0FF);
+
+
+}
+void Test_First_LED(void) {
+	write_MCP23017(0x13, 0xFE);
+	write_MCP23017(0x12, 0xFE);
+}
+void Blink_All_LEDs(void) {
+	while (1) {
+		write_MCP23017(0x13, 0xFF);
+		HAL_Delay(500);
+		write_MCP23017(0x13, 0x00);
+		HAL_Delay(500);
+	}
+}
+
+
+void LED_Chenillard(void) {
+	for (uint8_t i = 0; i < 8; i++) {
+		write_MCP23017(0x13, ~(1 << i));
+		write_MCP23017(0x12, ~(1 << i));
+		HAL_Delay(200);
+	}
+
+}
+void LED_Driver_Init(LED_Driver_t *driver) {
+
+	driver->init = init_MCP23017;
+	driver->write = write_MCP23017;
+	driver->read = read_MCP23S17;
+	driver->test_first_led = Test_First_LED;
+	driver->chenillard = LED_Chenillard;
+	driver->blink_all = Blink_All_LEDs;
+
+
+	driver->init();
+}
+
+/*
+ * led.h
+ *
+ *  Created on: Nov 21, 2025
+ *      Author: maram
+ */
+
+#ifndef INC_LED_H_
+#define INC_LED_H_
+
+#include <stdint.h>
+#include "shell.h"
+
+
+typedef struct {
+    void (*init)(void);
+    void (*write)(uint8_t reg, uint8_t value);
+    void (*test_first_led)(void);
+    void (*chenillard)(void);
+    void (*blink_all)(void);
+    uint8_t (*read)(uint8_t reg);
+} LED_Driver_t;
+
+
+void write_MCP23017(uint8_t reg, uint8_t value);
+void init_MCP23017(void);
+void Test_First_LED(void);
+void Blink_All_LEDs(void);
+void LED_Chenillard(void);
+void LED_Driver_Init(LED_Driver_t *driver);
+#endif /* INC_LED_H_ */
+
+```
+Le driver a été initialisé en appelant la fonction LED_Driver_Init(), qui associe chaque fonction du driver à un pointeur de fonction dans la structure LED_Driver_t.
+```
+while(1){
+
+LED_Driver_Init(&led_driver);
+led_driver.blink_all();
+  }
+```
+
+![Test d’une LED sur deux](assets/video1_gif.gif)
+### 2.3.2 Écriture d’une fonction shell permettant d’allumer ou d’éteindre n’importe quelle LED
+
+Une fonction shell a été créée dans leds.c pour allumer ou éteindre une LED sur le périphérique GPIO Expander MCP23S17 via une commande shell.
+
+La fonction shell_control_led permet de contrôler l’état des LEDs en fonction des arguments passés à la commande. Elle attend une commande au format suivant : 
+l <port> <pin> <state> 
+avec:
+port : Port sur lequel la LED est connectée ('A' pour le port A, 'B' pour le port B).
+
+pin : Numéro de la LED (valeurs possibles de 0 à 7).
+
+state : État de la LED (1 pour allumer, 0 pour éteindre)
+
+```
+
+int shell_control_led(h_shell_t *h_shell, int argc, char **argv) {
+
+	if (argc != 4) {
+		snprintf(h_shell->print_buffer, BUFFER_SIZE, "Usage: l <port> <pin> <state>\r\n");
+		h_shell->drv.transmit(h_shell->print_buffer, strlen(h_shell->print_buffer));
+		return -1;
+	}
+
+
+	char port = argv[1][0];
+	int pin = atoi(argv[2]);
+	int state = atoi(argv[3]);
+
+
+	if ((port != 'A' && port != 'B') || pin < 0 || pin > 7 || (state != 0 && state != 1)) {
+		snprintf(h_shell->print_buffer, BUFFER_SIZE, "Invalid arguments\r\n");
+		h_shell->drv.transmit(h_shell->print_buffer, strlen(h_shell->print_buffer));
+		return -1;
+	}
+
+
+	uint8_t reg = (port == 'A') ? 0x13 : 0x12;
+	uint8_t current_state = 0;
+
+
+	if (led_driver.read) {
+		current_state = led_driver.read(reg);
+	}
+
+
+	if (state == 1) {
+		current_state &= ~(1 << pin);
+	} else {
+		current_state |= (1 << pin);
+	}
+
+	led_driver.write(reg, current_state);
+
+	// Retourner un message de confirmation
+	snprintf(h_shell->print_buffer, BUFFER_SIZE, "LED %c%d %s\r\n", port, pin, state ? "ON" : "OFF");
+	h_shell->drv.transmit(h_shell->print_buffer, strlen(h_shell->print_buffer));
+
+	return 0;
+}
+
+```
+```
+void init_shell(void *unused)
+{
+	h_shell.drv.receive = drv_uart2_receive;
+	h_shell.drv.transmit = drv_uart2_transmit;
+
+	shell_init(&h_shell);
+	shell_add(&h_shell, 'l', shell_control_led, "Control LEDs: l <port> <pin> <state>");
+
+	const char *startup_msg = "\r\nType commands:\r\n";
+	h_shell.drv.transmit(startup_msg, strlen(startup_msg));
+}
+```
+
+```
+void init_shell(void *unused)
+{
+	h_shell.drv.receive = drv_uart2_receive;
+	h_shell.drv.transmit = drv_uart2_transmit;
+
+	shell_init(&h_shell);
+	shell_add(&h_shell, 'l', shell_control_led, "Control LEDs: l <port> <pin> <state>");
+
+	const char *startup_msg = "\r\nType commands:\r\n";
+	h_shell.drv.transmit(startup_msg, strlen(startup_msg));
+}
+
+
+void Task_control_Led(void *argument)
+{
+
+	LED_Driver_Init(&led_driver);
+	init_shell(NULL);
+	shell_run(&h_shell);
+}
+```
+```
+xTaskCreate(Task_control_Led,"Task_control_led", 256, NULL, 2, NULL);
+```
  ![image13](assets/image13.jpg)
 
-Ces commandes permettent de valider rapidement le fonctionnement du driver ainsi que la communication SPI avec le MCP23S17.
+Pour envoyer une commande, on tape par exemple: 
+```css
+
+l A 2 1
+
+```
+Cela allume la LED sur le port A, pin 2, et affiche:
+
+```vbnet
+
+LED A2 ON
+
+```
 
 <img src="assets/image12.jpg" width="350">
 
