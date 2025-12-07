@@ -300,7 +300,7 @@ void Blink_All_LEDs(void) {
 
 #### 2.2.2 Chenillard
 
-```
+``` c
 void LED_Chenillard(void) {
 	for (uint8_t i = 0; i < 8; i++) {
 		write_MCP23017(0x13, ~(1 << i));
@@ -316,7 +316,7 @@ void LED_Chenillard(void) {
 
 Dans cette partie du TP, nous avons créé un driver pour piloter les LEDs connectées au GPIO Expander MCP23S17 en utilisant une structure LED_Driver_t. Cette structure permet d'encapsuler les fonctions nécessaires pour contrôler les LEDs, telles que l'initialisation du MCP23S17, l'écriture dans les registres, ainsi que des fonctions comme le test d'une LED, le chenillard, et le clignotement de toutes les LEDs.
 
-```
+``` c
 /*
  * led.c
  *
@@ -441,9 +441,9 @@ void LED_Chenillard(void);
 void LED_Driver_Init(LED_Driver_t *driver);
 #endif /* INC_LED_H_ */
 
-```
+``` 
 Le driver a été initialisé en appelant la fonction LED_Driver_Init(), qui associe chaque fonction du driver à un pointeur de fonction dans la structure LED_Driver_t.
-```
+``` c
 while(1){
 
 LED_Driver_Init(&led_driver);
@@ -465,7 +465,7 @@ pin : Numéro de la LED (valeurs possibles de 0 à 7).
 
 state : État de la LED (1 pour allumer, 0 pour éteindre)
 
-```
+``` c
 
 int shell_control_led(h_shell_t *h_shell, int argc, char **argv) {
 
@@ -513,7 +513,7 @@ int shell_control_led(h_shell_t *h_shell, int argc, char **argv) {
 }
 
 ```
-```
+``` c
 void init_shell(void *unused)
 {
 	h_shell.drv.receive = drv_uart2_receive;
@@ -527,7 +527,7 @@ void init_shell(void *unused)
 }
 ```
 
-```
+``` c
 void init_shell(void *unused)
 {
 	h_shell.drv.receive = drv_uart2_receive;
@@ -549,7 +549,9 @@ void Task_control_Led(void *argument)
 	shell_run(&h_shell);
 }
 ```
-```
+Puis nous avons créé une tache qui appelle cette fonction : 
+
+``` c
 xTaskCreate(Task_control_Led,"Task_control_led", 256, NULL, 2, NULL);
 ```
  ![image13](assets/image13.jpg)
@@ -557,14 +559,14 @@ xTaskCreate(Task_control_Led,"Task_control_led", 256, NULL, 2, NULL);
 Pour envoyer une commande, on tape par exemple: 
 ```css
 
-l A 2 1
+l A 1 1
 
 ```
 Cela allume la LED sur le port A, pin 2, et affiche:
 
 ```vbnet
 
-LED A2 ON
+LED A1 ON
 
 ```
 
@@ -584,20 +586,18 @@ Ces deux broches correspondent à l’interface **I2C2** du STM32L476RG.
  ![image14](assets/image14.jpg)
 ### 3.1.2 Activation de l’I2C2
 
-Le périphérique **I2C2** a été activé dans STM32CubeIDE en laissant la configuration par défaut.  
-Cette interface est utilisée pour configurer les registres du CODEC audio SGTL5000.
+Le périphérique **I2C2** a été activé en laissant la configuration par défaut.  
 
 ![Activation de l’I2C2 dans CubeMX](assets/image19.jpg)
 
 ### 3.1.3 Configuration du SAI2 
 
 Le bloc **SAI A** a été configuré en mode **Master with Master Clock Out** afin de générer le signal d’horloge MCLK nécessaire au CODEC.  
-Le protocole **I2S/PCM** a été activé avec une taille de données de **16 bits** et un fonctionnement en mode **stéréo**.
+Le protocole **I2S/PCM** a été activé avec une taille de données de **16 bits**.
 ![Configuration](assets/image21.jpg)
 
 ### 3.1.4 Mapping des broches du SAI2
 
-Les broches du périphérique **SAI2** ont été vérifiées et placées conformément à l’énoncé du TP.  
 Les signaux sont connectés comme suit :
 
 - **PB12 → SAI2_FS_A**
@@ -614,8 +614,6 @@ Cette configuration assure une communication correcte entre le STM32 et le CODEC
 
 Dans l’onglet **Clock Configuration** de STM32CubeIDE, le **PLLSAI1** a été configuré afin d’obtenir une fréquence de **12.235294 MHz** pour le périphérique **SAI2**, conformément à l’énoncé du TP.
 
-Cette fréquence correspond au signal **MCLK (Master Clock)** nécessaire au bon fonctionnement du CODEC audio **SGTL5000**.
-
 ![Configuration du PLLSAI1 pour obtenir 12.235294 MHz au SAI2](assets/image15.jpg)
 
 
@@ -631,7 +629,7 @@ Le bloc **SAI B** a été configuré en mode **Slave Receive**, synchronisé ave
 
 ### 3.1.7 Activation des interruptions du SAI2
 
-Les interruptions du périphérique **SAI2** ont été activées dans l’onglet **NVIC** de STM32CubeIDE.  
+Les interruptions du périphérique **SAI2** ont été activées.  
 Cela permet au microcontrôleur de gérer les événements liés au transfert des données audio (transmission et réception via DMA).
 
 ![Activation des interruptions du SAI2](assets/image20.jpg)
@@ -643,8 +641,6 @@ Le **DMA** a été configuré pour les deux blocs du SAI2 afin de permettre le t
 - **SAI2_A → DMA1 Channel 6**
 - **SAI2_B → DMA1 Channel 7**
 - Mode de fonctionnement : **Circulaire**
-
-Cette configuration est nécessaire pour assurer un flux de données audio continu entre le STM32 et le CODEC SGTL5000.
 
 ![Configuration DMA pour SAI2](assets/image18.jpg)
 
@@ -661,7 +657,7 @@ __HAL_SAI_ENABLE(&hsai_BlockA2);
 
 ### 3.2.1 Vérification du signal MCLK à l’oscilloscope
 
-À l’aide d’un oscilloscope, la présence du signal **MCLK** généré par le bloc **SAI2** a été vérifiée sur la broche **PB14 (SAI2_MCLK_A)**.
+À l’aide d’un oscilloscope, la présence du signal **MCLK** généré par le bloc **SAI2** a été vérifiée.
 
 La mesure indique une fréquence d’environ **12.3 MHz**, ce qui correspond à la valeur attendue (**12.235294 MHz**).  
 Cela confirme que la configuration du **PLLSAI1** et du **SAI2** est correcte.
@@ -672,7 +668,32 @@ Cela confirme que la configuration du **PLLSAI1** et du **SAI2** est correcte.
 
 La fonction `HAL_I2C_Mem_Read()` a été utilisée pour lire le contenu du registre **CHIP_ID** situé à l’adresse **0x0000** du CODEC **SGTL5000**.  
 L’adresse I2C utilisée pour le périphérique est **0x14**.
+``` c
 
+void task_read_CHIP_ID(void *unused) {
+	uint8_t SGTL5000_I2C_ADDR = 0x14;
+	uint8_t CHIP_ID_Value[2];
+	uint16_t CHIP_ID_Reg = 0x0000;
+	while(1){
+		HAL_StatusTypeDef status = HAL_I2C_Mem_Read(&hi2c2, SGTL5000_I2C_ADDR,
+				CHIP_ID_Reg, I2C_MEMADD_SIZE_16BIT,
+				CHIP_ID_Value, 2, 1000);
+
+		if (status == HAL_OK) {
+			printf("CHIP_ID = 0x%02X%02X\n", CHIP_ID_Value[0], CHIP_ID_Value[1]);
+		} else {
+			printf("Erreur de lecture CHIP_ID : %d\n", status);
+		}
+		HAL_Delay(500);
+	}
+}
+
+```
+Puis nous avons créé une tache qui appelle cette fonction : 
+
+``` c
+//xTaskCreate(task_read_CHIP_ID, "Read_CHIP_ID", 256, NULL, 3, NULL);
+```
 La valeur lue correspond à **0x0001**, ce qui confirme que la communication **I2C fonctionne correctement** entre le STM32 et le CODEC.
 
 ![Lecture du registre CHIP_ID sur Tera Term](assets/image28.jpg)
@@ -681,7 +702,6 @@ La valeur lue correspond à **0x0001**, ce qui confirme que la communication **I
 
 Les trames **I2C** ont été observées directement à l’oscilloscope sur les lignes **SCL/SDA** lors de la communication entre le STM32 et le CODEC **SGTL5000**.
 
-Le signal mesuré présente des créneaux réguliers correspondant aux impulsions d’horloge et aux données échangées sur le bus I2C, ce qui confirme le bon fonctionnement de la communication entre les deux dispositifs.
 
 ![Observation des trames I2C à l’oscilloscope](assets/image27.png)
 ### 3.2.5 Valeurs des registres du CODEC SGTL5000
@@ -715,14 +735,81 @@ c
 ### 3.2.7 Fonction d’initialisation du CODEC
 
 Dans sgtl5000.c, nous avons créé une fonction dédiée
+```c
+HAL_StatusTypeDef sgtl5000_init(h_sgtl5000_t * h_sgtl5000)
+{
+	HAL_StatusTypeDef ret = HAL_OK;
+	uint16_t mask;
+
+	mask = 0x6AFF;
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_ANA_POWER, mask);
+
+	mask = (1 << 5) | (1 << 6);
+	sgtl5000_i2c_set_bit(h_sgtl5000, SGTL5000_CHIP_LINREG_CTRL, mask);
+
+	mask = 0x01FF;	// VAG_VAL = 1.575V, BIAS_CTRL = -50%, SMALL_POP = 1
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_REF_CTRL, mask);
+
+	mask = 0x031E;
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_LINE_OUT_CTRL, mask);
+
+	mask = 0x1106;	// MODE_CM = 2, MODE_LR = 1, LVLADJC = 200mA, LVLADJL = 75mA, LVLADJR = 50mA
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_SHORT_CTRL, mask);
+
+	mask = 0x0004;	// Unmute all + SELECT_ADC = LINEIN
+	//	mask = 0x0000;	// Unmute all + SELECT_ADC = MIC
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_ANA_CTRL, mask);
+
+	mask = 0x6AFF;	// LINEOUT_POWERUP, ADC_POWERUP, CAPLESS_HEADPHONE_POWERUP, DAC_POWERUP, HEADPHONE_POWERUP, REFTOP_POWERUP, ADC_MONO = stereo
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_ANA_POWER, mask);
+	
+	mask = 0x0073;	// I2S_IN_POWERUP, I2S_OUT_POWERUP, DAP_POWERUP, DAC_POWERUP, ADC_POWERUP
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_DIG_POWER, mask);
+
+	mask =  0x0505;	// TODOo recalculer
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_LINE_OUT_VOL, mask);
+
+	mask = 0x0004;	// SYS_FS = 48kHz
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_CLK_CTRL, mask);
+
+	mask = 0x0130;	// DLEN = 16 bits
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_I2S_CTRL, mask);
+
+	mask = 0x0010;	// DAC_SELECT = I2S_IN
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_SSS_CTRL, mask);
+
+	/* Le reste */
+	mask = 0x0000;	// Unmute
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_ADCDAC_CTRL, mask);
+
+	mask = 0x3C3C;
+	//	mask = 0x4747;
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_DAC_VOL, mask);
+
+	mask = 0x0251;	// BIAS_RESISTOR = 2, BIAS_VOLT = 5, GAIN = 1
+	sgtl5000_i2c_write_register(h_sgtl5000, SGTL5000_CHIP_MIC_CTRL, mask);
 
 
-#### 3.2.8 Configuration des registres du CODEC via I²C
+	return ret;
+}
+```
 
-L’écriture des registres du SGTL5000 a été réalisée via I²C.  
-Le message suivant affiché sur le terminal confirme que l’initialisation s’est déroulée correctement :
+#### 3.2.8 Initialisation du SGTL5000
+``` c
+void sgtl5000Init(void)
+{
+	sgtl5000_handle.hi2c = &h_i2c2;
+	sgtl5000_handle.i2c_address = 0x14;
 
-> **SGTL5000: Initialization complete.**
+	HAL_StatusTypeDef ret = sgtl5000_init(&sgtl5000_handle);
+	if (ret == HAL_OK) {
+		printf("SGTL5000 initialized successfully!\r\n");
+		HAL_Delay(100);
+	} else {
+		printf("SGTL5000 initialization failed. Error: %d\r\n", ret);
+	}
+}
+```
 
 ![image](assets/image29.jpg)
 
@@ -736,20 +823,22 @@ Le CODEC est donc configuré et opérationnel.
 
 Pour permettre l’échange continu des données audio, deux buffers I²S ont été créés :
 
-
+```c
+uint16_t txBuffer[BUFF_SIZE]; // Buffer de transmission SAI
+uint16_t rxBuffer[BUFF_SIZE]; // Buffer de réception SAI
+```
 Ils permettent :
 
 - la réception des échantillons audio,
 - la transmission vers le DAC,
-- la base pour le traitement audio en temps réel.
-
+```c
+HAL_SAI_Transmit_DMA(&hsai_BlockA2, (uint8_t*)audio_tx_buffer, AUDIO_BUFFER_SIZE * 2);
+HAL_SAI_Receive_DMA(&hsai_BlockB2, (uint8_t*)audio_rx_buffer, AUDIO_BUFFER_SIZE * 2);
+```
 ---
 
 ### 3.3.2 Observation des signaux I²S à l’oscilloscope
 
-Après l’activation du DMA, les signaux I²S ont été observés à l’oscilloscope afin de valider la communication audio.
-
-Les signaux mesurés :
 
 - **MCLK** — Master Clock
   
@@ -758,7 +847,6 @@ Les signaux mesurés :
 - **SCK** — Serial Clock  
 <img src="assets/image31.jpg" width="700">
 
-Cette mesure confirme le bon fonctionnement de l’interface I²S.
 
 ### 3.4 Génération de signal audio
 
@@ -766,13 +854,44 @@ Dans cette étape, un **signal triangulaire** a été généré et envoyé vers 
 
 #### 3.4.1 Création du signal triangulaire
 
-Un buffer audio a été rempli avec une valeur variant linéairement, permettant de produire une onde triangulaire simple.
+```c
+void generateTriangleWave(void) {
+    static float phase = 0.0;
+    float amplitude = 32767;  // Maximum amplitude for 16-bit audio signal
+    float period = (float)SAMPLE_RATE / FREQUENCY;  // Period of the signal in samples
+
+    // Generate the triangular wave
+    for (int i = 0; i < BUFF_SIZE; i++) {
+
+        // Calculate the phase within one period (0 to 1)
+        float phaseInPeriod = phase - floorf(phase);
+
+        // Triangular wave value calculation
+        float value = calculateTriangleValue(phaseInPeriod, amplitude);
+
+        // Store the generated value in the buffer
+        txTrBuffer[i] = (int16_t)value;
+
+        // Increment the phase for the next sample
+        incrementPhase(&phase, period);
+
+        // Debugging output
+        printf("Transmitting sample: %d, Value: %d\r\n", i, txTrBuffer[i]);
+        HAL_Delay(100);  // Simulate a delay between samples
+    }
+    // Start the DMA transmission
+    SAI_Transmit_DMA();
+}
+
+```
+Pour vérifier la génération on a visualiser les points sur le terminal : 
+![Signal triangulaire](assets/triang.jpg)
 
 #### 3.4.2 Observation à l’oscilloscope
 
 La sortie LINE-OUT du CODEC a été observée à l’oscilloscope, où un signal triangulaire stable a été clairement visualisé.
 
-![Signal triangulaire](assets/image32.jpg)
+![Signal triangulaire](assets/sig.jpg)
 
 
 
