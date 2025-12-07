@@ -884,8 +884,6 @@ void generateTriangleWave(void) {
 }
 
 ```
-Pour vérifier la génération on a visualiser les points sur le terminal : 
-![Signal triangulaire](assets/triang.png)
 
 #### 3.4.2 Observation à l’oscilloscope
 
