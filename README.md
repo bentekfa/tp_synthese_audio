@@ -920,10 +920,33 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
 
 La sortie LINE-OUT du CODEC a été observée à l’oscilloscope, où un signal triangulaire stable a été clairement visualisé.
 
-![Signal triangulaire](assets/sig.png)
+![Signal triangulaire](assets/scope_7.png)
 
 
+### 3.5 Bypass numérique 
 
+```c
+void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai)
+{
+  if (hsai->Instance == SAI2_Block_B)
+  {
+    for (int i = 0; i < AUDIO_BLOCK_SIZE * 2; i++) {
+        audio_tx_buffer[i] = audio_rx_buffer[i];
+    }
+  }
+}
+
+void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai)
+{
+  if (hsai->Instance == SAI2_Block_B)
+  {
+    for (int i = 0; i < AUDIO_BLOCK_SIZE * 2; i++) {
+        audio_tx_buffer[AUDIO_BLOCK_SIZE * 2 + i] = audio_rx_buffer[AUDIO_BLOCK_SIZE * 2 + i];
+    }
+  }
+}
+```
+![Signal triangulaire](assets/scope_7.png)
 
 
 
