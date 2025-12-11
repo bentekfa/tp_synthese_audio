@@ -946,7 +946,7 @@ void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai)
   }
 }
 ```
-![Signal triangulaire](assets/scope_7.png)
+![Signal triangulaire](assets/bypass.png)
 
 
 
