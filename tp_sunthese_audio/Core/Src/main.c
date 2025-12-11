@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "dma.h"
+#include "i2c.h"
 #include "sai.h"
 #include "spi.h"
 #include "usart.h"
@@ -33,16 +34,28 @@
 #include "drv_usart2.h"
 #include"led.h"
 #include "sgtl5000.h"
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 I2C_HandleTypeDef h_i2c2;
 h_sgtl5000_t sgtl5000_handle;
+LED_Driver_t led_driver;
+extern SPI_HandleTypeDef hspi3;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define AUDIO_BLOCK_SIZE 24
+#define AUDIO_BUFFER_SIZE (AUDIO_BLOCK_SIZE * 4)
+
+// Defines for triangular wave generation
+#define SAMPLE_RATE_HZ 48000
+#define TRIANGLE_TEST_FREQ_HZ 440
+#define TRIANGLE_MAX_AMPLITUDE 15000
+#define TRIANGLE_STEP ((2 * TRIANGLE_MAX_AMPLITUDE) / (SAMPLE_RATE_HZ / TRIANGLE_TEST_FREQ_HZ))
+
 
 /* USER CODE END PD */
 
@@ -57,8 +70,13 @@ h_sgtl5000_t sgtl5000_handle;
 uint8_t rxbuffer;
 SemaphoreHandle_t uartRxSemaphore;
 h_shell_t h_shell;
-LED_Driver_t led_driver;
-extern SPI_HandleTypeDef hspi3;
+uint16_t audio_tx_buffer[AUDIO_BUFFER_SIZE];
+uint16_t audio_rx_buffer[AUDIO_BUFFER_SIZE];
+
+// Global variables for triangle wave generation
+int16_t triangle_current_value = 0;
+int8_t triangle_direction = 1;
+
 
 
 /* USER CODE END PV */
@@ -90,20 +108,20 @@ void ShellTask(void  * argument)
 	shell_run();
 
 }
-
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if (huart->Instance == USART2)
-    {
-        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	if (huart->Instance == USART2)
+	{
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
 
-        xSemaphoreGiveFromISR(uartRxSemaphore, &xHigherPriorityTaskWoken);
-        HAL_UART_Receive_IT(&huart2, &rxbuffer, 1);
+		xSemaphoreGiveFromISR(uartRxSemaphore, &xHigherPriorityTaskWoken);
+		HAL_UART_Receive_IT(&huart2, &rxbuffer, 1);
 
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-    }
-}*/
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+}
 int fonction(h_shell_t * h_shell, int argc, char ** argv)
 {
 	int size = snprintf (h_shell->print_buffer, BUFFER_SIZE, "Je suis une fonction bidon\r\n");
@@ -153,7 +171,7 @@ void task_read_CHIP_ID(void *unused) {
 	uint8_t SGTL5000_I2C_ADDR = 0x14;
 	uint8_t CHIP_ID_Value[2];
 	uint16_t CHIP_ID_Reg = 0x0000;
-while(1){
+	while(1){
 		HAL_StatusTypeDef status = HAL_I2C_Mem_Read(&hi2c2, SGTL5000_I2C_ADDR,
 				CHIP_ID_Reg, I2C_MEMADD_SIZE_16BIT,
 				CHIP_ID_Value, 2, 1000);
@@ -163,19 +181,100 @@ while(1){
 		} else {
 			printf("Erreur de lecture CHIP_ID : %d\n", status);
 		}
-		 HAL_Delay(500);
+		HAL_Delay(500);
 	}
 }
-void sgtl5000Init(void){
+
+void sgtl5000Init(void)
+{
+	sgtl5000_handle.hi2c = &hi2c2; // Correction: Utilisation de hi2c2 généré par CubeMX
+	sgtl5000_handle.i2c_address = 0x14;
 
 	HAL_StatusTypeDef ret = sgtl5000_init(&sgtl5000_handle);
 	if (ret == HAL_OK) {
-		printf("SGTL5000 initialized successfully!\n");
+		printf("SGTL5000 initialized successfully!\r\n");
 		HAL_Delay(100);
 	} else {
-
-		printf("SGTL5000 initialization failed. Error: %d\n", ret);
+		printf("SGTL5000 initialization failed. Error: %d\r\n", ret);
 	}
+}
+
+
+// ---------- SAI Transmit Half-Complete Callback (LOGIQUE AMIE ADAPTÉE) ----------
+void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
+{
+	if (hsai->Instance == SAI2_Block_A)
+	{
+
+		for (int i = 0; i < AUDIO_BLOCK_SIZE; i++) {
+			// Generate triangle wave for current sample
+			triangle_current_value += triangle_direction * TRIANGLE_STEP;
+
+			if (triangle_current_value >= TRIANGLE_MAX_AMPLITUDE) {
+				triangle_current_value = TRIANGLE_MAX_AMPLITUDE;
+				triangle_direction = -1;
+			} else if (triangle_current_value <= -TRIANGLE_MAX_AMPLITUDE) {
+				triangle_current_value = -TRIANGLE_MAX_AMPLITUDE;
+				triangle_direction = 1;
+			}
+			uint16_t output_sample = (uint16_t)triangle_current_value;
+
+			// Fill both left and right channels with the same sample
+			audio_tx_buffer[(2 * i)] = output_sample;     // Left Channel
+			audio_tx_buffer[(2 * i) + 1] = output_sample; // Right Channel
+		}
+	}
+}
+
+// SAI Transmit Complete Callback
+void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
+{
+	if (hsai->Instance == SAI2_Block_A)
+	{
+
+		for (int i = 0; i < AUDIO_BLOCK_SIZE; i++) {
+			// Generate triangle wave for current sample
+			triangle_current_value += triangle_direction * TRIANGLE_STEP;
+
+			if (triangle_current_value >= TRIANGLE_MAX_AMPLITUDE) {
+				triangle_current_value = TRIANGLE_MAX_AMPLITUDE; // Cap at max
+				triangle_direction = -1; // Change direction to falling
+			} else if (triangle_current_value <= -TRIANGLE_MAX_AMPLITUDE) {
+				triangle_current_value = -TRIANGLE_MAX_AMPLITUDE; // Cap at min
+				triangle_direction = 1; // Change direction to rising
+			}
+
+			uint16_t output_sample = (uint16_t)triangle_current_value;
+
+			// Fill both left and right channels with the same sample
+			audio_tx_buffer[AUDIO_BLOCK_SIZE * 2 + (2 * i)] = output_sample;     // Left Channel
+			audio_tx_buffer[AUDIO_BLOCK_SIZE * 2 + (2 * i) + 1] = output_sample; // Right Channel
+		}
+	}
+}
+
+void HAL_SAI_RxHalfCpltCallback(SAI_HandleTypeDef *hsai)
+{
+  if (hsai->Instance == SAI2_Block_B)
+  {
+    // Process the first half of the RX buffer
+    // Copy first half of RX buffer to first half of TX buffer
+    for (int i = 0; i < AUDIO_BLOCK_SIZE * 2; i++) {
+        audio_tx_buffer[i] = audio_rx_buffer[i];
+    }
+  }
+}
+
+void HAL_SAI_RxCpltCallback(SAI_HandleTypeDef *hsai)
+{
+  if (hsai->Instance == SAI2_Block_B)
+  {
+    // Process the second half of the RX buffer
+    // Copy second half of RX buffer to second half of TX buffer
+    for (int i = 0; i < AUDIO_BLOCK_SIZE * 2; i++) {
+        audio_tx_buffer[AUDIO_BLOCK_SIZE * 2 + i] = audio_rx_buffer[AUDIO_BLOCK_SIZE * 2 + i];
+    }
+  }
 }
 /* USER CODE END 0 */
 
@@ -215,13 +314,19 @@ int main(void)
   MX_USART2_UART_Init();
   MX_SPI3_Init();
   MX_SAI2_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
 	__HAL_SAI_ENABLE(&hsai_BlockA2);
-	LED_Driver_Init(&led_driver);
+	init_MCP23017();
+	//LED_Driver_Init(&led_driver);
+	sgtl5000_handle.hi2c = &hi2c2;
+	sgtl5000_handle.i2c_address = SGTL5000_I2C_ADDR_WRITE;
+	sgtl5000_init(&sgtl5000_handle);
 
-	sgtl5000_handle.hi2c=&h_i2c2;
-	sgtl5000_handle.i2c_address= 0x14;
-	sgtl5000Init();
+	// Start SAI DMA transfers
+	HAL_SAI_Transmit_DMA(&hsai_BlockA2, (uint8_t*)audio_tx_buffer, AUDIO_BUFFER_SIZE);
+	HAL_SAI_Receive_DMA(&hsai_BlockB2, (uint8_t*)audio_rx_buffer, AUDIO_BUFFER_SIZE);
+
 	//*******QUESTION 4 ********
 	//printf("Test printf sur USART2 !\r\n");
 
@@ -251,9 +356,7 @@ int main(void)
 	shell_init(&h_shell);
 	shell_add(&h_shell, 'f', fonction, "Une fonction inutile");
 	shell_run(&h_shell);*/
-	init_MCP23017();
 
-	LED_Driver_Init(&led_driver);
 
 	//xTaskCreate(Task_Chenillard,"Task_Chenillard", 256, NULL, 1, NULL);
 	//xTaskCreate(Task_control_Led,"Task_control_led", 256, NULL, 2, NULL);
@@ -292,8 +395,6 @@ int main(void)
 
 
 		//led_driver.blink_all();
-
-
 	}
   /* USER CODE END 3 */
 }

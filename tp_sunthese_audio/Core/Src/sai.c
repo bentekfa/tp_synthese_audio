@@ -28,6 +28,7 @@
 SAI_HandleTypeDef hsai_BlockA2;
 SAI_HandleTypeDef hsai_BlockB2;
 DMA_HandleTypeDef hdma_sai2_a;
+DMA_HandleTypeDef hdma_sai2_b;
 
 /* SAI2 init function */
 void MX_SAI2_Init(void)
@@ -91,6 +92,10 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* saiHandle)
     if (SAI2_client == 0)
     {
        __HAL_RCC_SAI2_CLK_ENABLE();
+
+    /* Peripheral interrupt init*/
+    HAL_NVIC_SetPriority(SAI2_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(SAI2_IRQn);
     }
     SAI2_client ++;
 
@@ -134,6 +139,10 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* saiHandle)
       if (SAI2_client == 0)
       {
        __HAL_RCC_SAI2_CLK_ENABLE();
+
+      /* Peripheral interrupt init*/
+      HAL_NVIC_SetPriority(SAI2_IRQn, 5, 0);
+      HAL_NVIC_EnableIRQ(SAI2_IRQn);
       }
     SAI2_client ++;
 
@@ -147,6 +156,26 @@ void HAL_SAI_MspInit(SAI_HandleTypeDef* saiHandle)
     GPIO_InitStruct.Alternate = GPIO_AF13_SAI2;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+    /* Peripheral DMA init*/
+
+    hdma_sai2_b.Instance = DMA1_Channel7;
+    hdma_sai2_b.Init.Request = DMA_REQUEST_1;
+    hdma_sai2_b.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_sai2_b.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_sai2_b.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_sai2_b.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_sai2_b.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_sai2_b.Init.Mode = DMA_NORMAL;
+    hdma_sai2_b.Init.Priority = DMA_PRIORITY_LOW;
+    if (HAL_DMA_Init(&hdma_sai2_b) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* Several peripheral DMA handle pointers point to the same DMA handle.
+     Be aware that there is only one channel to perform all the requested DMAs. */
+    __HAL_LINKDMA(saiHandle,hdmarx,hdma_sai2_b);
+    __HAL_LINKDMA(saiHandle,hdmatx,hdma_sai2_b);
     }
 }
 
@@ -161,6 +190,7 @@ void HAL_SAI_MspDeInit(SAI_HandleTypeDef* saiHandle)
       {
       /* Peripheral clock disable */
        __HAL_RCC_SAI2_CLK_DISABLE();
+      HAL_NVIC_DisableIRQ(SAI2_IRQn);
       }
 
     /**SAI2_A_Block_A GPIO Configuration
@@ -181,6 +211,7 @@ void HAL_SAI_MspDeInit(SAI_HandleTypeDef* saiHandle)
       {
       /* Peripheral clock disable */
       __HAL_RCC_SAI2_CLK_DISABLE();
+      HAL_NVIC_DisableIRQ(SAI2_IRQn);
       }
 
     /**SAI2_B_Block_B GPIO Configuration
@@ -188,6 +219,8 @@ void HAL_SAI_MspDeInit(SAI_HandleTypeDef* saiHandle)
     */
     HAL_GPIO_DeInit(GPIOC, GPIO_PIN_12);
 
+    HAL_DMA_DeInit(saiHandle->hdmarx);
+    HAL_DMA_DeInit(saiHandle->hdmatx);
     }
 }
 
