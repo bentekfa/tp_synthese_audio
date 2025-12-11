@@ -63,7 +63,7 @@ Les captures ci-dessous montrent :
 Un **shell série** a été mis en place afin de permettre une interaction directe avec la carte via le terminal série.
 
 ***(a) Dans une tâche***
-Une tâche FreeRTOS gère le shell, lisant et traitant les commandes via une boucle.
+Une tâche FreeRTOS qui gère le shell.
 
 ```c
 //creation de la tache 
@@ -101,7 +101,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 	}
 }
-
+```
+Dans le main, on crée le sémaphore: 
+```
 uartRxSemaphore = xSemaphoreCreateBinary();
 	if (uartRxSemaphore == NULL)
 	{
@@ -112,7 +114,6 @@ uartRxSemaphore = xSemaphoreCreateBinary();
 ***(c) Avec un driver sous forme de structure.***
 ```c
 #include "shell.h"
-
 #include <stdio.h>
 
 static int sh_help(h_shell_t * h_shell, int argc, char ** argv) {
@@ -237,40 +238,30 @@ int shell_run(h_shell_t * h_shell) {
 ---
 ## 2 – Le GPIO Expander et le VU-Mètre
 
-### 2.1 Configuration du GPIO Expander
+### 2.1.1 Réference du GPIO Expander
 
 Le VU-mètre du TP est piloté à l’aide d’un **GPIO Expander** dont la référence est :
 
-- **MCP23S17** (expander GPIO 16 bits commandé en SPI)
+le MCP23S17-E/S0. Ce périphérique communique avec le microcontrôleur via une interface SPI
+et fournit 16 broches GPIO configurables comme entrées ou sorties.
 
-La communication entre le STM32 et le MCP23S17 se fait via le bus **SPI3** du microcontrôleur.
+#### 2.2.2 SPI utilisé
 
-### 2.2 Configuration du SPI3 dans STM32CubeIDE
+Nous avons utilisé le SPI3
 
-#### 2.2.1 Paramètres généraux du SPI
-
-D’après la documentation du **MCP23S17**, la fréquence maximale du bus SPI est de **10 MHz**.  
-Nous avons donc configuré le périphérique **SPI3** à 10 MHz dans STM32CubeIDE, comme illustré ci-dessous :
-
-![Configuration du SPI3 dans STM32CubeIDE](assets/image9.jpg)
-
-Les paramètres principaux sont les suivants :
-
-- **Fréquence SPI** : 10 MHz  
-- **Data size** : 8 bits (conformément au protocole SPI et au MCP23S17)  
-- **NSS Signal Type** : gestion en **software** (NSS Software)
-
-#### 2.2.2 Mapping des broches SPI3
-
-Ensuite, il est nécessaire de mapper correctement les signaux SPI3 du STM32 vers le MCP23S17.  
-La configuration retenue est la suivante :
-
+#### 2.2.3 Les paramètres à configurer 
+- D'après la documentation du MCP23S17, ce circuit supporte une fréquence d'horloge SPI maximale de 10 MHz.
+- On a définit la taille des données (data size) à 8 bits, conformément au protocole de communication SPI.
+- On a choisit le mode software pour le type de signal NSS (NSS Signal Type).
+- - On a mappé les signaux SPI sur les broches du STM32:
 - **SPI3_MOSI** (Master Out Slave In)  → **PB5**  
 - **SPI3_MISO** (Master In Slave Out) → **PC11**  
 - **SPI3_SCK** (Serial Clock)         → **PC10**  
 - **SPI3_/CS** (Chip Select)          → **PB7**  
 - **/RESET** du MCP23S17              → **PA0**
-
+  
+#### 2.2.4 Configuration
+![Configuration du SPI3 dans STM32CubeIDE](assets/image9.jpg)
 
 ![Mapping des signaux SPI3 sur la NUCLEO-L476RG](assets/image8.jpg)
 
@@ -312,9 +303,10 @@ void LED_Chenillard(void) {
 ```
 ![Test d’une LED](assets/video2_gif.gif)
 
-### 2.3.1 Création d'un Driver pour Piloter les LEDs
+### 2.3 Création d'un Driver pour Piloter les LEDs
+#### 2.3.1 Clignotement des Leds avec structure:
 
-Dans cette partie du TP, nous avons créé un driver pour piloter les LEDs connectées au GPIO Expander MCP23S17 en utilisant une structure LED_Driver_t. Cette structure permet d'encapsuler les fonctions nécessaires pour contrôler les LEDs, telles que l'initialisation du MCP23S17, l'écriture dans les registres, ainsi que des fonctions comme le test d'une LED, le chenillard, et le clignotement de toutes les LEDs.
+Dans cette partie du TP, nous avons créé un driver pour piloter les LEDs connectées au GPIO Expander MCP23S17 en utilisant une structure LED_Driver_t. La structure LED_Driver_t contient des pointeurs vers plusieurs fonctions liées aux LEDs. Ces fonctions incluent l'initialisation du MCP23S17 (init), l'écriture dans les registres (write), le contrôle d'une LED spécifique (test_first_led), le chenillard (chenillard), et le clignotement de toutes les LEDs (blink_all).
 
 ``` c
 /*
@@ -584,9 +576,9 @@ Les lignes utilisées pour l’I²C sur la carte NUCLEO-L476RG sont les suivante
 
 Ces deux broches correspondent à l’interface **I2C2** du STM32L476RG.
  ![image14](assets/image14.jpg)
-### 3.1.2 Activation de l’I2C2
+### 3.1.2 Activation de l’I2C
 
-Le périphérique **I2C2** a été activé en laissant la configuration par défaut.  
+Le périphérique **I2C** a été activé en laissant la configuration par défaut.  
 
 ![Activation de l’I2C2 dans CubeMX](assets/image19.jpg)
 
@@ -612,7 +604,7 @@ Cette configuration assure une communication correcte entre le STM32 et le CODEC
 
  ### 3.1.5 Configuration de l’horloge du SAI2 (PLLSAI1)
 
-Dans l’onglet **Clock Configuration** de STM32CubeIDE, le **PLLSAI1** a été configuré afin d’obtenir une fréquence de **12.235294 MHz** pour le périphérique **SAI2**, conformément à l’énoncé du TP.
+Dans l’onglet **Clock Configuration**  le **PLLSAI1** a été configuré afin d’obtenir une fréquence de **12.235294 MHz** pour le périphérique **SAI2**, conformément à l’énoncé du TP.
 
 ![Configuration du PLLSAI1 pour obtenir 12.235294 MHz au SAI2](assets/image15.jpg)
 
@@ -654,7 +646,7 @@ Pour cela, la ligne suivante a été ajoutée dans la fonction `main()`, juste a
 ```c
 __HAL_SAI_ENABLE(&hsai_BlockA2);
 ```
-
+### 3.2  Configuration du CODEC par l’I2C
 ### 3.2.1 Vérification du signal MCLK à l’oscilloscope
 
 À l’aide d’un oscilloscope, la présence du signal **MCLK** généré par le bloc **SAI2** a été vérifiée.
@@ -701,7 +693,7 @@ La valeur lue correspond à **0x0001**, ce qui confirme que la communication **I
 ### 3.2.3 Observation des trames I2C à l’oscilloscope
 
 Les trames **I2C** ont été observées directement à l’oscilloscope sur les lignes **SCL/SDA** lors de la communication entre le STM32 et le CODEC **SGTL5000**.
-
+### 3.2.4 Le professeur à vérifié les siganux.
 
 ![Observation des trames I2C à l’oscilloscope](assets/image27.png)
 ### 3.2.5 Valeurs des registres du CODEC SGTL5000
@@ -855,32 +847,71 @@ Dans cette étape, un **signal triangulaire** a été généré et envoyé vers 
 #### 3.4.1 Création du signal triangulaire
 
 ```c
-void generateTriangleWave(void) {
-    static float phase = 0.0;
-    float amplitude = 32767;  // Maximum amplitude for 16-bit audio signal
-    float period = (float)SAMPLE_RATE / FREQUENCY;  // Period of the signal in samples
 
-    // Generate the triangular wave
-    for (int i = 0; i < BUFF_SIZE; i++) {
+#define AUDIO_BLOCK_SIZE 24
+#define AUDIO_BUFFER_SIZE (AUDIO_BLOCK_SIZE * 4)
 
-        // Calculate the phase within one period (0 to 1)
-        float phaseInPeriod = phase - floorf(phase);
+// Defines for triangular wave generation
+#define SAMPLE_RATE_HZ 48000
+#define TRIANGLE_TEST_FREQ_HZ 440
+#define TRIANGLE_MAX_AMPLITUDE 15000
+#define TRIANGLE_STEP ((2 * TRIANGLE_MAX_AMPLITUDE) / (SAMPLE_RATE_HZ / TRIANGLE_TEST_FREQ_HZ))
 
-        // Triangular wave value calculation
-        float value = calculateTriangleValue(phaseInPeriod, amplitude);
+uint16_t audio_tx_buffer[AUDIO_BUFFER_SIZE];
+uint16_t audio_rx_buffer[AUDIO_BUFFER_SIZE];
 
-        // Store the generated value in the buffer
-        txTrBuffer[i] = (int16_t)value;
+// Global variables for triangle wave generation
+int16_t triangle_current_value = 0;
+int8_t triangle_direction = 1; 
+void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
+{
+	if (hsai->Instance == SAI2_Block_A)
+	{
 
-        // Increment the phase for the next sample
-        incrementPhase(&phase, period);
+		for (int i = 0; i < AUDIO_BLOCK_SIZE; i++) {
+			// Generate triangle wave for current sample
+			triangle_current_value += triangle_direction * TRIANGLE_STEP;
 
-        // Debugging output
-        printf("Transmitting sample: %d, Value: %d\r\n", i, txTrBuffer[i]);
-        HAL_Delay(100);  // Simulate a delay between samples
-    }
-    // Start the DMA transmission
-    SAI_Transmit_DMA();
+			if (triangle_current_value >= TRIANGLE_MAX_AMPLITUDE) {
+				triangle_current_value = TRIANGLE_MAX_AMPLITUDE;
+				triangle_direction = -1;
+			} else if (triangle_current_value <= -TRIANGLE_MAX_AMPLITUDE) {
+				triangle_current_value = -TRIANGLE_MAX_AMPLITUDE;
+				triangle_direction = 1;
+			}
+			uint16_t output_sample = (uint16_t)triangle_current_value;
+
+			// Fill both left and right channels with the same sample
+			audio_tx_buffer[(2 * i)] = output_sample;     // Left Channel
+			audio_tx_buffer[(2 * i) + 1] = output_sample; // Right Channel
+		}
+	}
+}
+
+void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
+{
+	if (hsai->Instance == SAI2_Block_A)
+	{
+
+		for (int i = 0; i < AUDIO_BLOCK_SIZE; i++) {
+			// Generate triangle wave for current sample
+			triangle_current_value += triangle_direction * TRIANGLE_STEP;
+
+			if (triangle_current_value >= TRIANGLE_MAX_AMPLITUDE) {
+				triangle_current_value = TRIANGLE_MAX_AMPLITUDE; // Cap at max
+				triangle_direction = -1; // Change direction to falling
+			} else if (triangle_current_value <= -TRIANGLE_MAX_AMPLITUDE) {
+				triangle_current_value = -TRIANGLE_MAX_AMPLITUDE; // Cap at min
+				triangle_direction = 1; // Change direction to rising
+			}
+
+			uint16_t output_sample = (uint16_t)triangle_current_value;
+
+			// Fill both left and right channels with the same sample
+			audio_tx_buffer[AUDIO_BLOCK_SIZE * 2 + (2 * i)] = output_sample;     // Left Channel
+			audio_tx_buffer[AUDIO_BLOCK_SIZE * 2 + (2 * i) + 1] = output_sample; // Right Channel
+		}
+	}
 }
 
 ```
